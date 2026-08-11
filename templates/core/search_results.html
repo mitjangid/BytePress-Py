@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results for "{{ query }}" - {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-8 border-b border-gray-200 dark:border-gray-800 pb-6">
+    <h1 class="text-2xl font-bold font-serif text-gray-900 dark:text-white">
+        Search Results for <span class="text-blue-600">"{{ query }}"</span>
+    </h1>
+    <p class="text-xs text-gray-500 mt-1">Found {{ page_obj.paginator.count }} published stories.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    {% for item in page_obj %}
+    <a href="/article/{{ item.slug }}/" class="group flex flex-col bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:shadow-lg transition">
+        {% if item.main_image and item.main_image.file %}
+        <div class="aspect-video overflow-hidden">
+            <img src="{{ item.main_image.file.url }}" alt="{{ item.main_image.alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        </div>
+        {% endif %}
+        <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{{ item.primary_category.name }}</span>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition leading-snug mt-1 mb-2">
+                    {{ item.title }}
+                </h3>
+                <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">{{ item.summary }}</p>
+            </div>
+            <div class="text-[11px] text-gray-400 flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3">
+                <span>{{ item.author.display_name }}</span>
+                <span>{{ item.published_at|date:"M j, Y" }}</span>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <p class="col-span-3 text-sm text-gray-500 py-12 text-center">No news articles matched your search query.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{% if category.name_hi %}{{ category.name_hi }} ({{ category.name }}){% else %}{{ category.name }}{% endif %} - {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="mb-8 border-b-2 border-crimson-700 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div>
+        <h1 class="text-2xl md:text-3xl font-black font-serif text-gray-900 dark:text-white flex items-center">
+            {% if category.icon %}<i class="{{ category.icon }} text-crimson-700 dark:text-saffron-400 mr-3"></i>{% endif %}
+            {% if category.name_hi %}{{ category.name_hi }} ({{ category.name }}){% else %}{{ category.name }}{% endif %}
+        </h1>
+        <p class="text-xs text-gray-500 mt-1">मुख्य समाचार और ताज़ा अपडेट्स</p>
+    </div>
+    <span class="text-xs font-bold bg-saffron-100 text-saffron-800 dark:bg-gray-800 dark:text-saffron-400 px-3 py-1 rounded-full self-start sm:self-auto">
+        {{ articles.count }} समाचार उपलब्ध
+    </span>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for item in articles %}
+    <a href="/article/{{ item.slug }}/" class="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md hover:border-saffron-500 transition flex flex-col justify-between">
+        <div>
+            {% if item.main_image and item.main_image.file %}
+            <div class="aspect-video overflow-hidden">
+                <img src="{{ item.main_image.file.url }}" alt="{{ item.main_image.alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            </div>
+            {% endif %}
+            <div class="p-4">
+                <h3 class="text-base font-bold text-gray-900 dark:text-white group-hover:text-crimson-700 dark:group-hover:text-saffron-400 transition leading-snug mb-2">
+                    {% if LANGUAGE_CODE == 'hi' and item.title_hi %}{{ item.title_hi }}{% else %}{{ item.title }}{% endif %}
+                </h3>
+                <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                    {% if LANGUAGE_CODE == 'hi' and item.summary_hi %}{{ item.summary_hi }}{% else %}{{ item.summary }}{% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 text-[11px] text-gray-400 flex items-center justify-between">
+            <span>{{ item.author.display_name }}</span>
+            <span>{{ item.published_at|date:"M j, Y" }}</span>
+        </div>
+    </a>
+    {% empty %}
+    <div class="col-span-full text-center py-12 text-gray-500">
+        <i class="fas fa-newspaper text-4xl mb-3 block text-gray-300"></i>
+        इस श्रेणी में अभी कोई समाचार उपलब्ध नहीं है।
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

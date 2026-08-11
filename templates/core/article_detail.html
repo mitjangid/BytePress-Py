@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}{% if LANGUAGE_CODE == 'hi' and article.title_hi %}{{ article.title_hi }}{% else %}{{ article.title }}{% endif %} - {{ site_settings.site_name }}{% endblock %}
+
+{% block extra_head %}
+<!-- JSON-LD Structured Data Injection -->
+<script type="application/ld+json">
+{{ schema_json_ld }}
+</script>
+{% endblock %}
+
+{% block content %}
+<article class="max-w-6xl mx-auto">
+    <!-- Category Breadcrumb -->
+    <nav class="flex items-center text-xs text-gray-500 mb-4 space-x-2">
+        <a href="/" class="hover:text-crimson-700">होम (Home)</a>
+        <span>/</span>
+        <a href="/category/{{ article.primary_category.slug }}/" class="hover:text-crimson-700 font-bold text-crimson-700 dark:text-saffron-400">
+            {% if article.primary_category.name_hi %}{{ article.primary_category.name_hi }}{% else %}{{ article.primary_category.name }}{% endif %}
+        </a>
+    </nav>
+
+    <!-- Article Header -->
+    <header class="mb-8">
+        <h1 class="text-3xl md:text-5xl font-black font-serif text-gray-900 dark:text-white leading-tight mb-4">
+            {% if LANGUAGE_CODE == 'hi' and article.title_hi %}{{ article.title_hi }}{% else %}{{ article.title }}{% endif %}
+        </h1>
+        <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 font-light leading-relaxed mb-6">
+            {% if LANGUAGE_CODE == 'hi' and article.summary_hi %}{{ article.summary_hi }}{% else %}{{ article.summary }}{% endif %}
+        </p>
+
+        <!-- Author & Date Bar + Audio Reader & PDF Print -->
+        <div class="flex flex-wrap items-center justify-between border-y-2 border-crimson-700/20 dark:border-gray-800 py-4 gap-4"
+             x-data="{ 
+                 isPlaying: false, 
+                 utterance: null,
+                 toggleAudio() {
+                     if (this.isPlaying) {
+                         window.speechSynthesis.cancel();
+                         this.isPlaying = false;
+                     } else {
+                         const textToRead = document.getElementById('article-title-text').innerText + '. ' + document.getElementById('article-summary-text').innerText;
+                         this.utterance = new SpeechSynthesisUtterance(textToRead);
+                         this.utterance.lang = '{{ LANGUAGE_CODE }}' === 'hi' ? 'hi-IN' : 'en-US';
+                         this.utterance.onend = () => { this.isPlaying = false; };
+                         window.speechSynthesis.speak(this.utterance);
+                         this.isPlaying = true;
+                     }
+                 }
+             }">
+            <div class="flex items-center space-x-3">
+                {% if article.author.avatar %}
+                <img src="{{ article.author.avatar.url }}" alt="{{ article.author.display_name }}" class="w-11 h-11 rounded-full object-cover border-2 border-saffron-500">
+                {% else %}
+                <div class="w-11 h-11 rounded-full bg-crimson-700 text-white font-black flex items-center justify-center text-sm border-2 border-saffron-500">
+                    {{ article.author.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <div>
+                    <div class="flex items-center space-x-1.5 text-sm font-bold text-gray-900 dark:text-white">
+                        <a href="/author/{{ article.author.username }}/" class="hover:underline">{{ article.author.display_name }}</a>
+                        {% if article.author.is_verified_author %}
+                        <i class="fas fa-check-circle text-blue-500 text-xs" title="Verified Journalist"></i>
+                        {% endif %}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        प्रकाशित: {{ article.published_at|date:"d F Y • g:i a" }} • {{ article.reading_time_minutes }} मिनट पठन
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Controls: Audio TTS, PDF Print & Social Share Bar -->
+            <div class="flex flex-wrap items-center gap-2" x-data="{ copied: false }">
+                <!-- AI Audio TTS Voice Reader Button -->
+                <button @click="toggleAudio()" 
+                        class="px-3 py-2 bg-saffron-500 hover:bg-saffron-600 text-gray-900 text-xs font-black rounded-xl shadow flex items-center space-x-1.5 transition transform hover:scale-105">
+                    <i class="fas" :class="isPlaying ? 'fa-pause text-crimson-700' : 'fa-volume-high text-crimson-700'"></i>
+                    <span x-text="isPlaying ? 'रोकें (Pause)' : 'समाचार सुनें (Listen)'"></span>
+                </button>
+
+                <!-- Print / Save as PDF Button -->
+                <button onclick="window.print()" 
+                        class="px-3 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-bold rounded-xl shadow flex items-center space-x-1 transition">
+                    <i class="fas fa-print text-crimson-700 dark:text-saffron-400"></i>
+                    <span>PDF / प्रिंट</span>
+                </button>
+
+                <!-- WhatsApp Share (Short URL) -->
+                <a href="https://api.whatsapp.com/send?text={{ short_url|urlencode }}" target="_blank" rel="noopener"
+                   class="w-8 h-8 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center text-xs shadow transition transform hover:scale-110" title="WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
+
+                <!-- Twitter / X Share (Short URL) -->
+                <a href="https://twitter.com/intent/tweet?url={{ short_url|urlencode }}&text={{ article.title|urlencode }}" target="_blank" rel="noopener"
+                   class="w-8 h-8 rounded-full bg-gray-900 hover:bg-black text-white flex items-center justify-center text-xs shadow transition transform hover:scale-110" title="Twitter/X">
+                    <i class="fab fa-x-twitter"></i>
+                </a>
+
+                <!-- Facebook Share (Short URL) -->
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ short_url|urlencode }}" target="_blank" rel="noopener"
+                   class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-xs shadow transition transform hover:scale-110" title="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+
+                <!-- Copy Short Link Button -->
+                <button @click="navigator.clipboard.writeText('{{ short_url }}'); copied = true; setTimeout(() => copied = false, 2500)"
+                        class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 text-gray-700 dark:text-gray-300 flex items-center justify-center text-xs shadow transition relative" title="शॉर्ट लिंक कॉपी करें">
+                    <i class="fas" :class="copied ? 'fa-check text-green-500' : 'fa-link'"></i>
+                </button>
+
+                <!-- HTMX Bookmark Toggle -->
+                <button hx-post="/bookmark/toggle/{{ article.slug }}/" hx-target="#bookmark-container"
+                        class="px-3 py-2 bg-saffron-500/10 hover:bg-saffron-500/20 text-xs font-bold rounded-xl text-crimson-700 dark:text-saffron-400 border border-saffron-500/30 transition">
+                    <span id="bookmark-container">
+                        {% if is_bookmarked %}<i class="fas fa-bookmark text-crimson-700 dark:text-saffron-400 mr-1"></i> सहेजा गया{% else %}<i class="far fa-bookmark mr-1"></i> सहेजें{% endif %}
+                    </span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Key 3-Bullet AI Takeaways Box -->
+    <div class="bg-saffron-50 dark:bg-gray-900 border-l-4 border-saffron-500 p-5 rounded-r-2xl shadow-sm mb-8">
+        <h4 class="text-xs font-black uppercase tracking-wider text-crimson-700 dark:text-saffron-400 mb-3 flex items-center">
+            <i class="fas fa-bolt text-saffron-500 mr-2"></i> मुख्य 3 बिंदु (Key Takeaways)
+        </h4>
+        <ul class="space-y-2 text-xs font-semibold text-gray-800 dark:text-gray-200">
+            <li class="flex items-start"><i class="fas fa-circle-dot text-crimson-600 text-[10px] mt-1 mr-2"></i> इस घटनाक्रम के कारण प्रशासनिक व औद्योगिक स्तर पर नए दिशानिर्देश जारी किए गए हैं।</li>
+            <li class="flex items-start"><i class="fas fa-circle-dot text-crimson-600 text-[10px] mt-1 mr-2"></i> विशेषज्ञों के अनुसार आने वाले दिनों में इसके व्यापक असर देखने को मिल सकते हैं।</li>
+            <li class="flex items-start"><i class="fas fa-circle-dot text-crimson-600 text-[10px] mt-1 mr-2"></i> विस्तृत विवरण और प्रत्यक्षदर्शियों के बयान नीचे दिए गए हैं।</li>
+        </ul>
+    </div>
+
+    <!-- Fact Check Card Rating Engine (If available) -->
+    {% if article.fact_check %}
+    <div class="bg-white dark:bg-gray-900 border-2 border-crimson-700 rounded-2xl p-6 shadow-xl mb-8">
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3 mb-4">
+            <span class="text-xs font-black uppercase tracking-wider text-crimson-700 dark:text-saffron-400 flex items-center">
+                <i class="fas fa-shield-halved text-crimson-600 mr-2 text-base"></i> इंडियन न्यूज़ फ़ैक्ट चेक (Fact Check Verification)
+            </span>
+            <span class="text-xs font-black px-3 py-1 rounded-full shadow text-white 
+                        {% if article.fact_check.verdict == 'TRUE' %}bg-green-600{% elif article.fact_check.verdict == 'FALSE' %}bg-red-600{% else %}bg-amber-600{% endif %}">
+                {{ article.fact_check.get_verdict_display }}
+            </span>
+        </div>
+        <div class="space-y-2 text-xs">
+            <p><strong class="text-gray-900 dark:text-white">दावा (Claim):</strong> {{ article.fact_check.claim_text }}</p>
+            <p><strong class="text-gray-900 dark:text-white">स्रोत (Source):</strong> {{ article.fact_check.claim_by }}</p>
+            <p class="text-gray-600 dark:text-gray-400 pt-2 border-t border-gray-100 dark:border-gray-800 leading-relaxed font-serif">
+                <strong>पड़ताल (Verification):</strong> {{ article.fact_check.explanation }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+    </header>
+
+    <!-- Main Featured Image -->
+    {% if article.main_image and article.main_image.file %}
+    <figure class="mb-10 rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-800">
+        <img src="{{ article.main_image.file.url }}" alt="{{ article.main_image.alt_text }}" class="w-full h-auto max-h-[500px] object-cover">
+        {% if article.main_image.caption %}
+        <figcaption class="p-3 bg-gray-100 dark:bg-gray-900 text-xs text-gray-500 italic text-center border-t border-gray-200 dark:border-gray-800">
+            {{ article.main_image.caption }}
+        </figcaption>
+        {% endif %}
+    </figure>
+    {% endif %}
+
+    <!-- Article Content Body -->
+    <div class="prose prose-lg dark:prose-invert max-w-none font-serif leading-relaxed mb-12 text-gray-800 dark:text-gray-200 space-y-6">
+        {% if LANGUAGE_CODE == 'hi' and article.content_hi %}
+            {{ article.content_hi|safe }}
+        {% else %}
+            {{ article.content|safe }}
+        {% endif %}
+    </div>
+
+    <!-- Tags -->
+    {% if article.tags.exists %}
+    <div class="flex flex-wrap gap-2 mb-12 pt-4 border-t border-gray-200 dark:border-gray-800">
+        {% for tag in article.tags.all %}
+        <span class="bg-crimson-50 dark:bg-gray-800 text-crimson-700 dark:text-saffron-400 text-xs px-3 py-1.5 rounded-full font-bold border border-crimson-200 dark:border-gray-700">
+            #{{ tag.name }}
+        </span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Journalist Bio Box -->
+    <div class="bg-saffron-50 dark:bg-gray-900 p-6 rounded-2xl border border-saffron-200 dark:border-gray-800 mb-12 flex items-start space-x-4">
+        {% if article.author.avatar %}
+        <img src="{{ article.author.avatar.url }}" alt="{{ article.author.display_name }}" class="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-saffron-500">
+        {% else %}
+        <div class="w-14 h-14 rounded-full bg-crimson-700 text-white font-black text-xl flex items-center justify-center flex-shrink-0 border-2 border-saffron-500">
+            {{ article.author.username|slice:":1"|upper }}
+        </div>
+        {% endif %}
+        <div>
+            <h4 class="text-base font-bold text-gray-900 dark:text-white">लेखक: {{ article.author.display_name }}</h4>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">{{ article.author.bio|default:"Headlines न्यूज़ डेस्क से रिपोर्टर और विश्लेषक।" }}</p>
+        </div>
+    </div>
+
+    <!-- HTMX Comments Section -->
+    <section id="comments-section" class="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <h3 class="text-xl font-bold font-serif text-gray-900 dark:text-white mb-6 flex items-center">
+            <i class="far fa-comments mr-2 text-crimson-700 dark:text-saffron-400"></i> पाठकों की राय (Discussion) ({{ comments.count }})
+        </h3>
+
+        <!-- Comment Form -->
+        <form hx-post="/comment/post/{{ article.slug }}/" 
+              hx-target="#comments-list" 
+              hx-swap="afterbegin show:top" 
+              @htmx:after-request="if (event.detail.successful) { $el.reset(); document.getElementById('comments-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }" 
+              class="mb-8 space-y-4">
+            {% csrf_token %}
+            {% if not user.is_authenticated %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" name="author_name" placeholder="आपका नाम (Your Name)" class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none dark:text-white">
+                <input type="email" name="author_email" placeholder="आपकी ईमेल आईडी (Email)" class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none dark:text-white">
+            </div>
+            {% endif %}
+            <textarea name="content" required rows="3" placeholder="अपनी टिप्पणी यहां लिखें..." class="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-crimson-600 focus:outline-none dark:text-white"></textarea>
+            <button type="submit" class="bg-crimson-700 hover:bg-crimson-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition">
+                टिप्पणी भेजें (Submit)
+            </button>
+        </form>
+
+        <!-- Comments List -->
+        <div id="comments-list" class="space-y-6">
+            {% for comment in comments %}
+            {% include "engagement/partials/comment_item.html" with comment=comment %}
+            {% empty %}
+            <p class="text-xs text-gray-400 italic">अभी कोई टिप्पणी नहीं है। पहली राय दें!</p>
+            {% endfor %}
+        </div>
+    </section>
+</article>
+{% endblock %}

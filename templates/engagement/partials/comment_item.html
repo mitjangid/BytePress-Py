@@ -1,0 +1,23 @@
+{% if show_toast %}
+<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+     class="bg-emerald-50 dark:bg-emerald-950/90 border-2 border-emerald-500 text-emerald-900 dark:text-emerald-200 p-3.5 rounded-xl text-xs font-bold shadow-xl mb-4 flex items-center justify-between transition transform duration-300">
+    <div class="flex items-center space-x-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <i class="fas fa-check-circle text-emerald-600 dark:text-emerald-400 text-base"></i>
+        <span>आपकी टिप्पणी सफलतापूर्वक पोस्ट कर दी गई है! (Comment submitted successfully!)</span>
+    </div>
+    <button @click="show = false" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 p-1"><i class="fas fa-times"></i></button>
+</div>
+{% endif %}
+
+<div id="comment-{{ comment.id }}" class="border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0">
+    <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center space-x-2">
+            <span class="font-bold text-xs text-gray-900 dark:text-white">{{ comment.display_author }}</span>
+            <span class="text-[10px] text-gray-400">• {{ comment.created_at|date:"M j, Y g:i a" }}</span>
+        </div>
+    </div>
+    <p class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+        {{ comment.content }}
+    </p>
+</div>

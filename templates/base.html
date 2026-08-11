@@ -1,0 +1,398 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true', searchOpen: false, mobileMenuOpen: false }" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>{% block title %}{{ site_settings.site_name }} - निष्पक्ष और सटीक समाचार | Indian News Portal{% endblock %}</title>
+
+    <!-- Tailwind CSS CLI CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    borderRadius: {
+                        DEFAULT: '2px',
+                        'none': '0px',
+                        'sm': '2px',
+                        'md': '3px',
+                        'lg': '4px',
+                        'xl': '4px',
+                        '2xl': '6px',
+                        '3xl': '6px',
+                    },
+                    colors: {
+                        crimson: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f472b6',
+                            400: '#e91e63',
+                            500: '#d81b60',
+                            600: '#c2185b',
+                            700: '#ad1457',
+                            800: '#880e4f',
+                            900: '#580633',
+                            950: '#380220',
+                        },
+                        saffron: {
+                            50: '#fff8e1',
+                            100: '#ffecb3',
+                            200: '#ffe082',
+                            300: '#ffd54f',
+                            400: '#ffca28',
+                            500: '#ff9800',
+                            600: '#f57c00',
+                            700: '#e65100',
+                            800: '#bf360c',
+                            900: '#802400',
+                        },
+                        indiaNavy: {
+                            900: '#0f172a',
+                            950: '#090d16',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Plus Jakarta Sans', 'Noto Sans Devanagari', 'system-ui', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Outfit & Plus Jakarta Sans (Google Sans Aesthetic) + Noto Sans Devanagari -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+
+    <!-- HTMX & Alpine.js -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#b91c1c">
+
+    <!-- Prevent Alpine FOUC Popup Flicker -->
+    <style>[x-cloak] { display: none !important; }</style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-200 min-h-screen flex flex-col pb-16 md:pb-0" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+    <!-- Top Utility Bar (Desktop & Mobile Responsive) -->
+    <header class="bg-gray-900 text-white text-xs border-b border-crimson-800 sticky top-0 z-40 shadow-md md:relative">
+        <div class="max-w-[1700px] mx-auto px-3 py-2 flex items-center justify-between gap-2">
+            
+            <!-- Mobile Hamburger Button & Logo Icon -->
+            <div class="flex items-center space-x-2 md:hidden">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-saffron-500 hover:bg-gray-800 rounded-lg focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center">
+                    <i class="fas" :class="mobileMenuOpen ? 'fa-times text-lg' : 'fa-bars text-lg'"></i>
+                </button>
+                <a href="/" class="flex items-center space-x-1.5 font-serif font-black text-white text-base">
+                    <img src="/static/images/logo.png" alt="Logo" class="h-8 w-auto rounded">
+                    <span>{{ site_settings.site_name }}</span>
+                </a>
+            </div>
+
+            <!-- Desktop Date & Regional City Bar + Live Sports Ticker -->
+            <div class="hidden md:flex items-center space-x-3 overflow-x-auto whitespace-nowrap">
+                <span class="text-saffron-500 font-bold">
+                    <i class="far fa-calendar-alt mr-1"></i> {{ now|date:"l, F j, Y" }}
+                </span>
+                <span class="text-gray-500">|</span>
+                <span class="bg-saffron-500 text-gray-900 px-2 py-0.5 rounded font-black text-[10px] flex items-center shadow">
+                    🏏 IND vs AUS: 284/4 (42.3 ov)
+                </span>
+                <span class="text-gray-500">|</span>
+                <div class="flex items-center space-x-2 text-[11px] text-gray-300">
+                    <span class="font-bold text-gray-400">राज्य / State:</span>
+                    <a href="/location/san-francisco/" class="hover:text-saffron-500 py-1">दिल्ली</a>
+                    <a href="/location/los-angeles/" class="hover:text-saffron-500 py-1">मुंबई</a>
+                    <a href="/location/new-york/" class="hover:text-saffron-500 py-1">यूपी</a>
+                    <a href="/location/austin/" class="hover:text-saffron-500 py-1">बिहार</a>
+                    <a href="/location/california/" class="hover:text-saffron-500 py-1">पंजाब</a>
+                </div>
+            </div>
+
+            <!-- Right Controls: Multilingual Switcher, Dark Mode, Search -->
+            <div class="flex items-center space-x-2">
+                <!-- Multilingual Language Switcher Dropdown -->
+                <form action="/i18n/setlang/" method="POST" class="flex items-center space-x-1">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.path }}">
+                    <i class="fas fa-language text-saffron-500 text-sm hidden sm:inline-block"></i>
+                    <select name="language" onchange="this.form.submit()" 
+                            class="bg-gray-800 text-white text-[11px] px-2 py-1.5 rounded border border-gray-700 focus:outline-none focus:ring-1 focus:ring-saffron-500 cursor-pointer min-h-[36px]">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+                        {% for language in languages %}
+                        <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                            {{ language.name_local }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </form>
+
+                <!-- Dark Mode Toggle -->
+                <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)" 
+                        class="p-2 text-gray-300 hover:text-saffron-500 focus:outline-none transition min-h-[36px] min-w-[36px] flex items-center justify-center">
+                    <template x-if="!darkMode">
+                        <i class="fas fa-moon text-saffron-500"></i>
+                    </template>
+                    <template x-if="darkMode">
+                        <i class="fas fa-sun text-saffron-500"></i>
+                    </template>
+                </button>
+
+                <!-- Search Button -->
+                <button @click="searchOpen = true" class="p-2 text-gray-300 hover:text-saffron-500 min-h-[36px] min-w-[36px] flex items-center justify-center">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Slide-over / Drawer Navigation Menu -->
+    <div x-show="mobileMenuOpen" x-transition.opacity class="fixed inset-0 bg-black/80 z-50 md:hidden" x-cloak>
+        <div @click.away="mobileMenuOpen = false" class="bg-gray-900 text-white w-4/5 max-w-sm h-full shadow-2xl flex flex-col justify-between overflow-y-auto">
+            <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <img src="/static/images/logo.jpg" alt="Logo" class="h-10 w-auto rounded">
+                    <span class="font-bold font-serif text-lg text-saffron-500">{{ site_settings.site_name }}</span>
+                </div>
+                <button @click="mobileMenuOpen = false" class="text-gray-400 p-2"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <!-- Categories & Quick Links -->
+            <div class="p-4 space-y-4 flex-1">
+                <h4 class="text-xs font-black uppercase text-saffron-500 tracking-wider">मुख्य श्रेणियां (Categories)</h4>
+                <div class="space-y-1">
+                    <a href="/" class="block px-3 py-2.5 rounded-lg bg-crimson-800 text-saffron-400 font-bold text-sm">
+                        <i class="fas fa-home mr-2"></i> होम (Home)
+                    </a>
+                    {% for cat in nav_categories %}
+                    <a href="/category/{{ cat.slug }}/" class="block px-3 py-2.5 rounded-lg hover:bg-gray-800 text-sm font-semibold text-gray-200">
+                        {% if cat.icon %}<i class="{{ cat.icon }} mr-2 text-saffron-400"></i>{% endif %}
+                        {% if cat.name_hi %}{{ cat.name_hi }} ({{ cat.name }}){% else %}{{ cat.name }}{% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <h4 class="text-xs font-black uppercase text-saffron-500 tracking-wider pt-4 border-t border-gray-800">राज्य समाचार (State News)</h4>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    {% for loc in nav_locations %}
+                    <a href="/location/{{ loc.slug }}/" class="p-2 bg-gray-800/60 rounded text-gray-300 hover:text-saffron-400">
+                        {% if loc.name_hi %}{{ loc.name_hi }}{% else %}{{ loc.name }}{% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-800 bg-gray-950 text-xs text-gray-400">
+                <a href="/admin/login/" class="block text-center bg-crimson-700 hover:bg-crimson-800 text-white font-bold py-2.5 rounded-lg">
+                    <i class="fas fa-user-lock mr-1.5"></i> स्टाफ लॉगिन (CMS Login)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Main Branding Bar -->
+    <div class="hidden md:block bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-4 shadow-sm">
+        <div class="max-w-[1700px] mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <a href="/" class="flex items-center space-x-3 group">
+                <img src="/static/images/logo.png" alt="BytePress Logo" class="h-14 w-auto rounded-lg shadow-md group-hover:scale-105 transition transform">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="text-2xl md:text-3xl font-extrabold font-serif text-crimson-700 dark:text-crimson-600 tracking-tight">
+                            {{ site_settings.site_name }}
+                        </h1>
+                        <span class="bg-saffron-500 text-gray-900 font-black text-[10px] uppercase px-1.5 py-0.5 rounded shadow">
+                            LIVE
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold tracking-wide">
+                        भारत का प्रमुख डिजिटल न्यूज़ पोर्टल | India's National Digital Newsroom
+                    </p>
+                </div>
+            </a>
+
+            <!-- Live TV & Fact Check Badges -->
+            <div class="flex items-center space-x-3">
+                <a href="/live-tv/" class="flex items-center space-x-2 bg-crimson-700 hover:bg-crimson-800 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md transition transform hover:scale-105">
+                    <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+                    <span><i class="fas fa-tv mr-1"></i> लाइव टीवी (Live TV)</span>
+                </a>
+                <a href="/search/?q=fact+check" class="flex items-center space-x-1.5 bg-saffron-500 hover:bg-saffron-600 text-gray-900 px-3 py-2 rounded-xl text-xs font-black shadow-md transition">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>फ़ैक्ट चेक (Fact Check)</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Navigation Bar -->
+    <nav class="hidden md:block bg-crimson-700 dark:bg-crimson-900 text-white sticky top-0 z-30 shadow-xl border-b-2 border-saffron-500">
+        <div class="max-w-[1700px] mx-auto px-4 flex items-center justify-between overflow-x-auto whitespace-nowrap scrollbar-none">
+            <div class="flex items-center space-x-1 py-1">
+                <a href="/" class="px-4 py-2.5 text-sm font-bold bg-crimson-800 text-saffron-400 rounded-lg hover:bg-crimson-900 transition flex items-center">
+                    <i class="fas fa-home mr-1.5"></i> होम (Home)
+                </a>
+                <a href="/shorts/" class="px-3.5 py-2.5 text-xs font-bold bg-saffron-500 text-gray-900 rounded-lg hover:bg-saffron-600 transition flex items-center shadow">
+                    <i class="fas fa-play-circle mr-1.5 text-crimson-700"></i> न्यूज़ शॉर्ट्स (Shorts)
+                </a>
+                {% for cat in nav_categories %}
+                <a href="/category/{{ cat.slug }}/" class="px-3.5 py-2.5 text-xs font-bold hover:bg-crimson-800 hover:text-saffron-300 rounded-lg transition flex items-center">
+                    {% if cat.icon %}<i class="{{ cat.icon }} mr-1.5 text-saffron-400"></i>{% endif %}
+                    {% if cat.name_hi %}{{ cat.name_hi }} ({{ cat.name }}){% else %}{{ cat.name }}{% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flashing Live Breaking News Ticker (Mobile Optimized) -->
+    {% if breaking_news_ticker %}
+    <div class="bg-gradient-to-r from-crimson-900 via-crimson-700 to-crimson-900 text-white text-xs py-2 px-3 border-b border-saffron-500/50 shadow-inner">
+        <div class="max-w-[1700px] mx-auto flex items-center">
+            <span class="font-black uppercase tracking-wider bg-saffron-500 text-gray-900 px-2 py-0.5 md:px-3 md:py-1 rounded mr-2 md:mr-3 flex items-center shadow text-[10px] md:text-xs flex-shrink-0">
+                <i class="fas fa-bolt mr-1 animate-bounce text-crimson-700"></i> ताज़ा | LIVE
+            </span>
+            <div class="overflow-hidden flex-1">
+                <div class="truncate">
+                    {% for item in breaking_news_ticker %}
+                    <a href="/article/{{ item.slug }}/" class="hover:text-saffron-300 font-bold mr-6 text-xs md:text-sm">
+                        {{ item.title }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Main Content Body -->
+    <main class="flex-grow max-w-[1700px] w-full mx-auto px-3 sm:px-4 py-4 md:py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- App-Style Mobile Sticky Bottom Bar (Only visible on mobile screens) -->
+    <div class="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gray-900 border-t border-crimson-800 text-gray-300 flex items-center justify-around py-2 px-1 text-[11px] shadow-2xl">
+        <a href="/" class="flex flex-col items-center text-saffron-500 font-bold min-w-[50px]">
+            <i class="fas fa-home text-base mb-0.5"></i>
+            <span>होम</span>
+        </a>
+        <a href="/search/?q=trending" class="flex flex-col items-center hover:text-saffron-400 min-w-[50px]">
+            <i class="fas fa-fire text-base mb-0.5 text-crimson-500"></i>
+            <span>ट्रेंडिंग</span>
+        </a>
+        <button @click="searchOpen = true" class="flex flex-col items-center hover:text-saffron-400 min-w-[50px]">
+            <i class="fas fa-search text-base mb-0.5"></i>
+            <span>खोजें</span>
+        </button>
+        <button @click="mobileMenuOpen = true" class="flex flex-col items-center hover:text-saffron-400 min-w-[50px]">
+            <i class="fas fa-th-large text-base mb-0.5"></i>
+            <span>श्रेणियां</span>
+        </button>
+        <a href="/admin/login/" class="flex flex-col items-center hover:text-saffron-400 min-w-[50px]">
+            <i class="fas fa-user-circle text-base mb-0.5"></i>
+            <span>प्रोफाइल</span>
+        </a>
+    </div>
+
+    <!-- Search Modal Overlay (Mobile Friendly) -->
+    <div x-show="searchOpen" x-transition.opacity class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center pt-12 md:pt-20 px-3" x-cloak>
+        <div @click.away="searchOpen = false" class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full p-4 md:p-6 border border-crimson-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base md:text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-search text-crimson-600 mr-2"></i> समाचार खोजें (Search News)
+                </h3>
+                <button @click="searchOpen = false" class="text-gray-400 hover:text-gray-600 p-2"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <form action="/search/" method="GET" class="flex gap-2">
+                <input type="text" name="q" placeholder="विषय, शहर या पत्रकार का नाम लिखें..." 
+                       class="flex-1 px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-crimson-600 focus:outline-none dark:text-white">
+                <button type="submit" class="bg-crimson-700 hover:bg-crimson-800 text-white font-bold px-4 md:px-6 py-2.5 rounded-xl text-sm transition">
+                    खोजें
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer (Mobile Optimized) -->
+    <footer class="bg-gray-900 text-gray-300 text-xs border-t-4 border-saffron-500 mt-8 md:mt-16">
+        <div class="max-w-[1700px] mx-auto px-4 py-8 md:py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <div>
+                <div class="flex items-center space-x-2 mb-3">
+                    <img src="/static/images/logo.jpg" alt="Headlines Logo" class="h-10 w-auto rounded">
+                    <h4 class="text-white text-lg font-bold font-serif">{{ site_settings.site_name }}</h4>
+                </div>
+                <p class="text-xs text-gray-400 leading-relaxed mb-4">
+                    भारत का अग्रणी स्वतंत्र समाचार पोर्टल। निष्पक्ष पत्रकारिता और त्वरित समाचार अपडेट्स।
+                </p>
+            </div>
+
+            <div>
+                <h5 class="text-saffron-500 font-bold mb-3 uppercase tracking-wider text-xs">श्रेणियां (Categories)</h5>
+                <ul class="space-y-2 text-xs">
+                    {% for cat in nav_categories %}
+                    <li><a href="/category/{{ cat.slug }}/" class="hover:text-saffron-400 transition">{% if cat.name_hi %}{{ cat.name_hi }}{% else %}{{ cat.name }}{% endif %}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div>
+                <h5 class="text-saffron-500 font-bold mb-3 uppercase tracking-wider text-xs">राज्य समाचार (State News)</h5>
+                <ul class="space-y-2 text-xs">
+                    {% for loc in nav_locations %}
+                    <li><a href="/location/{{ loc.slug }}/" class="hover:text-saffron-400 transition">{% if loc.name_hi %}{{ loc.name_hi }}{% else %}{{ loc.name }}{% endif %}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div>
+                <h5 class="text-saffron-500 font-bold mb-3 uppercase tracking-wider text-xs">न्यूज़लेटर (Newsletter)</h5>
+                <p class="text-xs text-gray-400 mb-3">मुख्य ख़बरें अपने ईमेल पर पाएं।</p>
+                <form action="/newsletter/subscribe/" method="POST" hx-post="/newsletter/subscribe/" hx-target="#footer-newsletter-response">
+                    {% csrf_token %}
+                    <div id="footer-newsletter-response">
+                        <div class="flex">
+                            <input type="email" name="email" required placeholder="आपकी ईमेल आईडी..." class="w-full px-3 py-2 text-xs bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none text-white">
+                            <button type="submit" class="bg-crimson-700 hover:bg-crimson-800 text-white text-xs px-3 py-2 rounded-r-lg font-bold">सब्सक्राइब</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-800 py-6 px-4">
+            <div class="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+                <div class="flex items-center space-x-4">
+                    <a href="/sitemap.xml" target="_blank" class="hover:text-saffron-400 flex items-center transition">
+                        <i class="fas fa-sitemap mr-1.5 text-saffron-500"></i> साइटमैप (XML Sitemap)
+                    </a>
+                    <span>•</span>
+                    <a href="/feed/" target="_blank" class="hover:text-saffron-400 flex items-center transition">
+                        <i class="fas fa-rss mr-1.5 text-saffron-500"></i> आरएसएस फीड (RSS Feed)
+                    </a>
+                    <span>•</span>
+                    <a href="/robots.txt" target="_blank" class="hover:text-saffron-400 flex items-center transition">
+                        <i class="fas fa-robot mr-1.5 text-saffron-500"></i> Robots.txt
+                    </a>
+                </div>
+                <div class="text-center sm:text-right text-[11px] text-gray-500">
+                    © 2026 {{ site_settings.site_name }} News Portal • सर्वाधिकार सुरक्षित | Powered by Django 5.x & PostgreSQL
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

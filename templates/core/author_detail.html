@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{{ author.display_name }} - Author Profile{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm mb-10 flex items-start space-x-6">
+    {% if author.avatar %}
+    <img src="{{ author.avatar.url }}" alt="{{ author.display_name }}" class="w-24 h-24 rounded-full object-cover flex-shrink-0">
+    {% else %}
+    <div class="w-24 h-24 rounded-full bg-blue-600 text-white font-bold text-3xl flex items-center justify-center flex-shrink-0">
+        {{ author.username|slice:":1"|upper }}
+    </div>
+    {% endif %}
+    <div>
+        <div class="flex items-center space-x-2 mb-2">
+            <h1 class="text-2xl font-bold font-serif text-gray-900 dark:text-white">{{ author.display_name }}</h1>
+            {% if author.is_verified_author %}
+            <i class="fas fa-check-circle text-blue-500 text-lg" title="Verified Author"></i>
+            {% endif %}
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ author.bio|default:"Journalist & Author for Headlines." }}</p>
+        <div class="flex space-x-4 text-xs text-gray-500">
+            {% if author.twitter_handle %}<span><i class="fab fa-x-twitter mr-1"></i> {{ author.twitter_handle }}</span>{% endif %}
+            {% if author.website %}<span><i class="fas fa-globe mr-1"></i> <a href="{{ author.website }}" target="_blank" class="hover:underline">Website</a></span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<h2 class="text-xl font-bold font-serif text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-800 pb-2">
+    Articles by {{ author.display_name }}
+</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    {% for item in page_obj %}
+    <a href="/article/{{ item.slug }}/" class="group flex flex-col bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:shadow-lg transition">
+        {% if item.main_image and item.main_image.file %}
+        <div class="aspect-video overflow-hidden">
+            <img src="{{ item.main_image.file.url }}" alt="{{ item.main_image.alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        </div>
+        {% endif %}
+        <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{{ item.primary_category.name }}</span>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition leading-snug mt-1 mb-2">
+                    {{ item.title }}
+                </h3>
+                <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">{{ item.summary }}</p>
+            </div>
+            <div class="text-[11px] text-gray-400 flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3">
+                <span>{{ item.published_at|date:"M j, Y" }}</span>
+                <span>{{ item.views_count }} views</span>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <p class="col-span-3 text-sm text-gray-500 py-12 text-center">No published articles for this author yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

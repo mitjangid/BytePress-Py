@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_settings.site_name }} - निष्पक्ष और सटीक समाचार | Top Indian Headlines{% endblock %}
+
+{% block content %}
+<!-- Hero Section (Optimized for Ultra-Wide Desktop, Tablet & Mobile) -->
+{% if hero_main %}
+<div class="grid grid-cols-1 lg:grid-cols-12 2xl:grid-cols-16 gap-6 md:gap-8 mb-10 md:mb-14">
+    <!-- Main Top Story Banner (Wide Screen Hero) -->
+    <div class="lg:col-span-7 2xl:col-span-9 group">
+        <a href="/article/{{ hero_main.slug }}/" class="block relative rounded-lg overflow-hidden shadow-2xl bg-gray-900 aspect-video md:aspect-[16/9] border border-saffron-500/40">
+            {% if hero_main.main_image and hero_main.main_image.file %}
+            <img src="{{ hero_main.main_image.file.url }}" alt="{{ hero_main.main_image.alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90">
+            {% else %}
+            <div class="w-full h-full bg-gradient-to-br from-crimson-900 via-gray-900 to-indiaNavy-900 flex items-center justify-center">
+                <i class="fas fa-newspaper text-6xl text-saffron-500/30"></i>
+            </div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent p-5 md:p-8 flex flex-col justify-end">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <span class="bg-saffron-500 text-gray-900 text-xs font-black px-3 py-1 rounded-sm uppercase tracking-wider shadow">
+                        {% if hero_main.primary_category.name_hi %}{{ hero_main.primary_category.name_hi }}{% else %}{{ hero_main.primary_category.name }}{% endif %}
+                    </span>
+                    {% if hero_main.is_breaking %}
+                    <span class="bg-crimson-700 text-white text-xs font-black px-3 py-1 rounded-sm uppercase tracking-wider flex items-center shadow animate-pulse">
+                        <i class="fas fa-bolt mr-1"></i> बड़ी खबर | Breaking
+                    </span>
+                    {% endif %}
+                </div>
+                <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight mb-3 group-hover:text-saffron-400 transition">
+                    {% if LANGUAGE_CODE == 'hi' and hero_main.title_hi %}{{ hero_main.title_hi }}{% else %}{{ hero_main.title }}{% endif %}
+                </h2>
+                <p class="text-gray-300 text-xs sm:text-sm md:text-base line-clamp-2 mb-4 font-light">
+                    {% if LANGUAGE_CODE == 'hi' and hero_main.summary_hi %}{{ hero_main.summary_hi }}{% else %}{{ hero_main.summary }}{% endif %}
+                </p>
+                <div class="flex flex-wrap items-center text-xs text-gray-300 gap-4 border-t border-gray-700/50 pt-3">
+                    <span><i class="far fa-user text-saffron-400 mr-1"></i> {{ hero_main.author.display_name }}</span>
+                    <span><i class="far fa-clock text-saffron-400 mr-1"></i> {{ hero_main.published_at|date:"M j, Y" }}</span>
+                    <span><i class="far fa-eye text-saffron-400 mr-1"></i> {{ hero_main.views_count }} व्यूज</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Secondary Headlines Stack (Desktop & Tablet) -->
+    <div class="lg:col-span-5 2xl:col-span-4 flex flex-col justify-between space-y-4">
+        <h3 class="text-xs sm:text-sm font-black text-crimson-700 dark:text-saffron-400 border-b-2 border-crimson-700 pb-2 uppercase tracking-wider flex items-center justify-between">
+            <span><i class="fas fa-newspaper mr-1.5 text-crimson-700"></i> खास ख़बरें (Top Headlines)</span>
+            <span class="w-2 h-2 rounded-full bg-crimson-600 animate-ping"></span>
+        </h3>
+        {% for item in hero_secondary %}
+        <a href="/article/{{ item.slug }}/" class="group flex space-x-3 p-3 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 hover:border-saffron-500 hover:shadow-md transition">
+            {% if item.main_image and item.main_image.file %}
+            <img src="{{ item.main_image.file.url }}" alt="{{ item.main_image.alt_text }}" class="w-24 h-24 object-cover rounded-sm flex-shrink-0 group-hover:opacity-90">
+            {% else %}
+            <div class="w-24 h-24 bg-gray-200 dark:bg-gray-800 rounded-sm flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-newspaper text-gray-400"></i>
+            </div>
+            {% endif %}
+            <div class="flex flex-col justify-between flex-1">
+                <div>
+                    <span class="text-[10px] font-black text-crimson-700 dark:text-saffron-400 uppercase tracking-wider">
+                        {% if item.primary_category.name_hi %}{{ item.primary_category.name_hi }}{% else %}{{ item.primary_category.name }}{% endif %}
+                    </span>
+                    <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white group-hover:text-crimson-700 dark:group-hover:text-saffron-400 transition leading-snug line-clamp-2">
+                        {% if LANGUAGE_CODE == 'hi' and item.title_hi %}{{ item.title_hi }}{% else %}{{ item.title }}{% endif %}
+                    </h4>
+                </div>
+                <div class="text-[10px] text-gray-500 mt-1 flex items-center justify-between">
+                    <span>{{ item.published_at|date:"M j" }}</span>
+                    <span class="text-saffron-600 font-semibold">{{ item.reading_time_minutes }} मिनट</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Ultra-Wide Screen Fast Ticker Column (2XL Screens Only) -->
+    <div class="hidden 2xl:flex 2xl:col-span-3 flex-col justify-between space-y-4 bg-white dark:bg-gray-900 p-4 rounded border border-gray-200 dark:border-gray-800 shadow-sm">
+        <h3 class="text-xs font-black uppercase tracking-wider text-crimson-700 dark:text-saffron-400 border-b-2 border-saffron-500 pb-2 flex items-center justify-between">
+            <span><i class="fas fa-bolt text-saffron-500 mr-1.5 animate-bounce"></i> 24x7 एक्सप्रेस फ़ीड</span>
+            <span class="text-[10px] bg-crimson-700 text-white px-2 py-0.5 rounded-sm font-bold">LIVE</span>
+        </h3>
+        <div class="space-y-3 divide-y divide-gray-100 dark:divide-gray-800">
+            {% for item in trending_articles|slice:":4" %}
+            <a href="/article/{{ item.slug }}/" class="group block pt-2 first:pt-0">
+                <span class="text-[10px] font-bold text-saffron-600 uppercase">{{ item.published_at|date:"H:i" }} IST</span>
+                <h4 class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-crimson-700 transition leading-snug line-clamp-2">
+                    {% if LANGUAGE_CODE == 'hi' and item.title_hi %}{{ item.title_hi }}{% else %}{{ item.title }}{% endif %}
+                </h4>
+            </a>
+            {% endfor %}
+        </div>
+        <a href="/shorts/" class="w-full py-2 bg-crimson-700 hover:bg-crimson-800 text-white text-xs font-bold text-center rounded transition block shadow">
+            न्यूज़ शॉर्ट्स देखें (View Shorts)
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Main Content Stream & Sidebar Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 2xl:grid-cols-16 gap-8">
+
+    <!-- Primary News Category Grid (Optimized for 4-Column Wide Grid) -->
+    <div class="lg:col-span-8 2xl:col-span-12 space-y-10">
+        {% for block_item in block_data %}
+        <section class="bg-white dark:bg-gray-900 p-5 md:p-6 rounded border border-gray-200 dark:border-gray-800 shadow-sm">
+            <div class="flex items-center justify-between border-b-2 border-crimson-700 pb-3 mb-6">
+                <h3 class="text-lg md:text-xl font-black text-gray-900 dark:text-white flex items-center">
+                    <span class="w-2.5 h-5 bg-saffron-500 rounded-sm mr-2.5"></span>
+                    {{ block_item.block.title }}
+                </h3>
+                {% if block_item.block.category %}
+                <a href="/category/{{ block_item.block.category.slug }}/" class="text-xs font-bold text-crimson-700 dark:text-saffron-400 hover:underline">
+                    सभी देखें (View All) <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Responsive Multi-Column Grid (1 col mobile, 2 col tablet, 3-4 col wide screens) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for item in block_item.items %}
+                <a href="/article/{{ item.slug }}/" class="group flex flex-col justify-between bg-gray-50 dark:bg-gray-800/40 p-3 rounded border border-gray-100 dark:border-gray-800 hover:border-saffron-500 transition">
+                    {% if item.main_image and item.main_image.file %}
+                    <div class="overflow-hidden rounded-sm mb-3 aspect-video relative">
+                        <img src="{{ item.main_image.file.url }}" alt="{{ item.main_image.alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        <span class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] px-2 py-0.5 rounded-sm font-bold">
+                            {{ item.primary_category.name }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div class="flex-1">
+                        <h4 class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white group-hover:text-crimson-700 dark:group-hover:text-saffron-400 transition leading-snug mb-2 line-clamp-2">
+                            {% if LANGUAGE_CODE == 'hi' and item.title_hi %}{{ item.title_hi }}{% else %}{{ item.title }}{% endif %}
+                        </h4>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-3 hidden sm:block">
+                            {% if LANGUAGE_CODE == 'hi' and item.summary_hi %}{{ item.summary_hi }}{% else %}{{ item.summary }}{% endif %}
+                        </p>
+                    </div>
+                    <div class="text-[11px] text-gray-400 flex items-center justify-between border-t border-gray-200 dark:border-gray-700/60 pt-2 mt-auto">
+                        <span>{{ item.author.display_name }}</span>
+                        <span>{{ item.published_at|date:"M j" }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+
+    <!-- Right Sidebar (Trending News & Editor Picks) -->
+    <aside class="lg:col-span-4 2xl:col-span-4 space-y-8">
+        <!-- Trending Stories Sidebar -->
+        <div class="bg-white dark:bg-gray-900 p-5 rounded border border-gray-200 dark:border-gray-800 shadow-sm">
+            <h3 class="text-xs font-black uppercase tracking-wider text-crimson-700 dark:text-saffron-400 border-b-2 border-saffron-500 pb-2 mb-4 flex items-center justify-between">
+                <span><i class="fas fa-fire text-crimson-600 mr-2"></i> ट्रेंडिंग ख़बरें (Trending News)</span>
+                <span class="text-[10px] bg-crimson-100 dark:bg-crimson-900 text-crimson-700 dark:text-crimson-200 px-2 py-0.5 rounded-sm font-bold">TOP READ</span>
+            </h3>
+            <div class="space-y-4">
+                {% for item in trending_articles %}
+                <a href="/article/{{ item.slug }}/" class="group flex items-start space-x-3 border-b border-gray-100 dark:border-gray-800 pb-3 last:border-0 last:pb-0">
+                    <span class="text-xl font-black text-saffron-600 dark:text-saffron-500 group-hover:text-crimson-700 transition w-6 text-center">
+                        0{{ forloop.counter }}
+                    </span>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-crimson-700 dark:group-hover:text-saffron-400 transition leading-snug">
+                            {% if LANGUAGE_CODE == 'hi' and item.title_hi %}{{ item.title_hi }}{% else %}{{ item.title }}{% endif %}
+                        </h4>
+                        <span class="text-[10px] text-gray-400 mt-1 block"><i class="far fa-eye mr-1"></i> {{ item.views_count }} पाठकों ने पढ़ा</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Editor's Choice -->
+        {% if editors_picks %}
+        <div class="bg-gradient-to-br from-crimson-900 via-crimson-800 to-gray-900 p-5 rounded text-white shadow-xl border-2 border-saffron-500/40">
+            <h3 class="text-xs font-black uppercase tracking-wider border-b border-saffron-500/50 pb-2 mb-4 flex items-center text-saffron-400">
+                <i class="fas fa-award text-saffron-400 mr-2"></i> संपादकीय पसंद (Editor's Picks)
+            </h3>
+            <div class="space-y-4">
+                {% for item in editors_picks %}
+                <a href="/article/{{ item.slug }}/" class="block group border-b border-crimson-700/50 pb-3 last:border-0 last:pb-0">
+                    <h4 class="text-xs font-bold text-white group-hover:text-saffron-300 transition leading-snug mb-1">
+                        {% if LANGUAGE_CODE == 'hi' and item.title_hi %}{{ item.title_hi }}{% else %}{{ item.title }}{% endif %}
+                    </h4>
+                    <span class="text-[10px] text-saffron-400 font-semibold">{{ item.author.display_name }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

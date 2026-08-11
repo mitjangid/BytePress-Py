@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}लाइव टीवी (Live TV Streaming) - {{ site_settings.site_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-[1700px] mx-auto">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-crimson-700 pb-4 mb-6 gap-2">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-black font-serif text-gray-900 dark:text-white flex items-center">
+                <span class="w-3.5 h-3.5 rounded-full bg-crimson-600 animate-ping mr-3"></span>
+                <i class="fas fa-tv text-crimson-700 dark:text-saffron-400 mr-2"></i> 
+                {{ site_settings.site_name }} लाइव टीवी (Live TV Streaming)
+            </h1>
+            <p class="text-xs text-gray-500 mt-1">24/7 🔴 देश और दुनिया की ताज़ा ख़बरें लाइव देखें</p>
+        </div>
+        <span class="inline-flex items-center px-3 py-1 bg-crimson-700 text-white text-xs font-black rounded-full shadow animate-pulse self-start sm:self-auto">
+            <i class="fas fa-broadcast-tower mr-1.5"></i> LIVE BROADCAST
+        </span>
+    </div>
+
+    <!-- Main Grid: Video Player + Sidebar -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        
+        <!-- Left 8 Columns: Responsive Embedded Live TV Stream Player -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-crimson-700/40">
+                <div class="aspect-video w-full">
+                    <iframe src="{{ stream_url }}" 
+                            title="{{ site_settings.site_name }} Live TV Broadcast"
+                            class="w-full h-full border-0" 
+                            allow="autoplay; encrypted-media; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Video Player Controls Info Card -->
+            <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-rss text-saffron-500 mr-2"></i> राष्ट्र की आवाज़ - सीधा प्रसारण
+                    </h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        सटीक विश्लेषण, ग्राउंड रिपोर्टिंग और निष्पक्ष समाचार बुलेटिन।
+                    </p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <a href="/search/?q=trending" class="px-4 py-2 bg-saffron-500 hover:bg-saffron-600 text-gray-900 text-xs font-black rounded-xl shadow transition">
+                        <i class="fas fa-fire mr-1"></i> ट्रेंडिंग बुलेटिन
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right 4 Columns: Trending Stories Sidebar -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <h3 class="text-xs font-black uppercase tracking-wider text-crimson-700 dark:text-saffron-400 border-b-2 border-saffron-500 pb-2 mb-4 flex items-center justify-between">
+                    <span><i class="fas fa-newspaper text-crimson-600 mr-2"></i> साथ में पढ़ें (Trending News)</span>
+                    <span class="text-[10px] bg-crimson-100 text-crimson-700 px-2 py-0.5 rounded font-bold">LIVE FEED</span>
+                </h3>
+                <div class="space-y-4">
+                    {% for item in trending_articles %}
+                    <a href="/article/{{ item.slug }}/" class="group flex items-start space-x-3 border-b border-gray-100 dark:border-gray-800 pb-3 last:border-0 last:pb-0">
+                        <span class="text-xl font-black text-saffron-600 dark:text-saffron-500 group-hover:text-crimson-700 transition w-6 text-center">
+                            0{{ forloop.counter }}
+                        </span>
+                        <div class="flex-1">
+                            <h4 class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-crimson-700 dark:group-hover:text-saffron-400 transition leading-snug">
+                                {% if LANGUAGE_CODE == 'hi' and item.title_hi %}{{ item.title_hi }}{% else %}{{ item.title }}{% endif %}
+                            </h4>
+                            <span class="text-[10px] text-gray-400 mt-1 block"><i class="far fa-clock mr-1"></i> {{ item.published_at|date:"M j, Y" }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
