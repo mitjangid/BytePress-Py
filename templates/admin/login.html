@@ -55,26 +55,29 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { background: #0a0a0f; }
+        body { background: #0d0d1a; }
         .bg-grid {
-            background-image: radial-gradient(circle, rgba(173,20,87,0.12) 1px, transparent 1px);
+            background-image: radial-gradient(circle, rgba(173,20,87,0.18) 1px, transparent 1px);
             background-size: 32px 32px;
         }
         .glass {
-            background: rgba(15, 15, 25, 0.85);
+            background: rgba(22, 22, 38, 0.92);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
         }
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0px 1000px #1a1a2e inset;
-            -webkit-text-fill-color: #fff;
+            -webkit-box-shadow: 0 0 0px 1000px #1e1e32 inset;
+            -webkit-text-fill-color: #f1f5f9;
             transition: background-color 5000s ease-in-out 0s;
         }
+        /* Ensure all text inside card is readable */
+        .glass label { color: #cbd5e1 !important; }
+        .glass p.sub-desc { color: #94a3b8 !important; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 font-sans selection:bg-crimson-700 selection:text-white relative overflow-hidden">
+<body class="min-h-screen flex items-center justify-center p-4 font-sans selection:bg-crimson-700 selection:text-white relative overflow-hidden text-slate-100">
 
     <!-- Ambient background grid -->
     <div class="bg-grid absolute inset-0 opacity-60 pointer-events-none"></div>
@@ -89,7 +92,7 @@
         <div class="text-center mb-5">
             <a href="/" class="inline-flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-saffron-400 transition-colors duration-200 group">
                 <i class="fas fa-arrow-left text-saffron-500 group-hover:-translate-x-1 transition-transform duration-200"></i>
-                Back to BytePress Portal
+                <span class="text-gray-300 group-hover:text-saffron-400 transition-colors">Back to BytePress Portal</span>
             </a>
         </div>
 
@@ -105,8 +108,8 @@
                     <img src="/static/images/logo.png" alt="BytePress Logo" class="h-16 w-auto mx-auto drop-shadow-lg">
                 </div>
                 <h1 class="text-2xl font-black text-white tracking-tight leading-tight">BytePress</h1>
-                <p class="text-xs font-semibold text-saffron-500 uppercase tracking-widest mt-0.5">CMS Dashboard</p>
-                <p class="text-xs text-gray-500 mt-2">Sign in to your staff account</p>
+                <p class="text-xs font-semibold text-saffron-400 uppercase tracking-widest mt-0.5">CMS Dashboard</p>
+                <p class="text-xs text-slate-400 mt-2">Sign in to your staff account</p>
             </div>
 
             <!-- Error message -->
@@ -127,27 +130,27 @@
 
                 <!-- Username -->
                 <div class="mb-4">
-                    <label for="id_username" class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Username</label>
+                    <label for="id_username" class="block text-[11px] font-bold uppercase tracking-widest text-slate-300 mb-2">Username</label>
                     <div class="relative">
                         <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none"></i>
                         <input type="text" name="username" id="id_username" x-model="user"
                                required autofocus autocomplete="username"
                                placeholder="Enter your username"
-                               class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-crimson-500 focus:border-crimson-500 text-sm text-white placeholder-gray-600 outline-none transition duration-200 hover:border-white/20">
+                               class="w-full pl-10 pr-4 py-3 bg-slate-800/70 border border-slate-600/60 rounded-xl focus:ring-2 focus:ring-crimson-500 focus:border-crimson-500 text-sm text-white placeholder-slate-500 outline-none transition duration-200 hover:border-slate-500">
                     </div>
                 </div>
 
                 <!-- Password -->
                 <div class="mb-6">
-                    <label for="id_password" class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Password</label>
+                    <label for="id_password" class="block text-[11px] font-bold uppercase tracking-widest text-slate-300 mb-2">Password</label>
                     <div class="relative">
                         <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none"></i>
                         <input :type="showPass ? 'text' : 'password'" name="password" id="id_password" x-model="pass"
                                required autocomplete="current-password"
                                placeholder="••••••••••••"
-                               class="w-full pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-crimson-500 focus:border-crimson-500 text-sm text-white placeholder-gray-600 outline-none transition duration-200 hover:border-white/20">
+                               class="w-full pl-10 pr-10 py-3 bg-slate-800/70 border border-slate-600/60 rounded-xl focus:ring-2 focus:ring-crimson-500 focus:border-crimson-500 text-sm text-white placeholder-slate-500 outline-none transition duration-200 hover:border-slate-500">
                         <button type="button" @click="showPass = !showPass"
-                                class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-200 transition-colors duration-200">
+                                class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors duration-200">
                             <i class="fas" :class="showPass ? 'fa-eye-slash' : 'fa-eye'" style="font-size: 13px;"></i>
                         </button>
                     </div>
@@ -162,48 +165,48 @@
             </form>
 
             <!-- Demo quick-fill section -->
-            <div class="mt-6 pt-5 border-t border-white/8">
-                <p class="text-center text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-3">
-                <i class="fas fa-key text-saffron-600 mr-1.5"></i>Quick Demo Access &nbsp;<span class="text-gray-700 normal-case tracking-normal font-normal">pass: BytePress@2026</span>
+            <div class="mt-6 pt-5 border-t border-slate-700/60">
+                <p class="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+                <i class="fas fa-key text-saffron-500 mr-1.5"></i>Quick Demo Access &nbsp;<span class="text-slate-400 normal-case tracking-normal font-normal">pass: BytePress@2026</span>
             </p>
             <div class="grid grid-cols-2 gap-2">
                     <button type="button" @click="user = 'admin'; pass = 'BytePress@2026'"
-                            class="group p-2.5 bg-white/4 hover:bg-crimson-900/40 border border-white/8 hover:border-crimson-700/60 rounded-xl text-left transition-all duration-200">
+                            class="group p-2.5 bg-slate-800/60 hover:bg-crimson-900/50 border border-slate-600/50 hover:border-crimson-600/70 rounded-xl text-left transition-all duration-200">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-user-shield text-saffron-500 text-xs group-hover:scale-110 transition-transform"></i>
                             <div>
                                 <p class="text-[11px] font-bold text-white">Super Admin</p>
-                                <p class="text-[10px] text-gray-500">admin</p>
+                                <p class="text-[10px] text-slate-400">admin</p>
                             </div>
                         </div>
                     </button>
                     <button type="button" @click="user = 'editor_marcus'; pass = 'BytePress@2026'"
-                            class="group p-2.5 bg-white/4 hover:bg-crimson-900/40 border border-white/8 hover:border-crimson-700/60 rounded-xl text-left transition-all duration-200">
+                            class="group p-2.5 bg-slate-800/60 hover:bg-crimson-900/50 border border-slate-600/50 hover:border-crimson-600/70 rounded-xl text-left transition-all duration-200">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-edit text-saffron-500 text-xs group-hover:scale-110 transition-transform"></i>
                             <div>
                                 <p class="text-[11px] font-bold text-white">Editor</p>
-                                <p class="text-[10px] text-gray-500">editor_marcus</p>
+                                <p class="text-[10px] text-slate-400">editor_marcus</p>
                             </div>
                         </div>
                     </button>
                     <button type="button" @click="user = 'editor_jane'; pass = 'BytePress@2026'"
-                            class="group p-2.5 bg-white/4 hover:bg-crimson-900/40 border border-white/8 hover:border-crimson-700/60 rounded-xl text-left transition-all duration-200">
+                            class="group p-2.5 bg-slate-800/60 hover:bg-crimson-900/50 border border-slate-600/50 hover:border-crimson-600/70 rounded-xl text-left transition-all duration-200">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-edit text-saffron-500 text-xs group-hover:scale-110 transition-transform"></i>
                             <div>
                                 <p class="text-[11px] font-bold text-white">Editor 2</p>
-                                <p class="text-[10px] text-gray-500">editor_jane</p>
+                                <p class="text-[10px] text-slate-400">editor_jane</p>
                             </div>
                         </div>
                     </button>
                     <button type="button" @click="user = 'author_elena'; pass = 'BytePress@2026'"
-                            class="group p-2.5 bg-white/4 hover:bg-crimson-900/40 border border-white/8 hover:border-crimson-700/60 rounded-xl text-left transition-all duration-200">
+                            class="group p-2.5 bg-slate-800/60 hover:bg-crimson-900/50 border border-slate-600/50 hover:border-crimson-600/70 rounded-xl text-left transition-all duration-200">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-pen-nib text-saffron-500 text-xs group-hover:scale-110 transition-transform"></i>
                             <div>
                                 <p class="text-[11px] font-bold text-white">Author</p>
-                                <p class="text-[10px] text-gray-500">author_elena</p>
+                                <p class="text-[10px] text-slate-400">author_elena</p>
                             </div>
                         </div>
                     </button>
@@ -212,7 +215,7 @@
         </div>
 
         <!-- Footer -->
-        <p class="text-center text-[11px] text-gray-700 mt-5">
+        <p class="text-center text-[11px] text-slate-500 mt-5">
             &copy; 2026 BytePress Media Network &mdash; Fast. Precise. Byte-Sized.
         </p>
     </div>
