@@ -1,5 +1,6 @@
 venv/
 .venv/
+.freebuff/
 __pycache__/
 *.pyc
 *.pyo
