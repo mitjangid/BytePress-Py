@@ -1,6 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+# Import filter models so they are picked up by Django migrations
+from .filter_models import BlockedWord, ProfanityLog  # noqa: F401
+
+
 class SectionType(models.TextChoices):
     HERO = 'HERO', _('Hero Main Banner & Grid')
     TICKER = 'TICKER', _('Breaking News Ticker')

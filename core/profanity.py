@@ -88,19 +88,46 @@ _HINDI_BAD_WORDS: List[str] = [
     "madar",
 ]
 
-# Merge all words and sort longest-first for greedy matching
-_ALL_BAD_WORDS: List[str] = sorted(
+# Base word list (sorted longest-first for greedy matching)
+_BASE_BAD_WORDS: List[str] = sorted(
     set(w.lower() for w in _ENGLISH_BAD_WORDS + _HINDI_BAD_WORDS),
     key=len,
     reverse=True,
 )
 
-# Pre-compile regex for each bad word with word boundaries
-# Use lookahead/lookbehind to handle partial-word matches
-_WORD_PATTERN = re.compile(
-    r'\b(' + '|'.join(re.escape(w) for w in _ALL_BAD_WORDS) + r')\b',
-    re.IGNORECASE
-)
+
+def _get_all_words() -> List[str]:
+    """
+    Merge static word list with active admin-managed BlockedWords from DB.
+    Falls back to static list if DB isn't ready (e.g., during migrations).
+    """
+    try:
+        from core.filter_models import BlockedWord
+        db_words = list(BlockedWord.objects.filter(is_active=True).values_list('word', flat=True))
+        merged = set(w.lower() for w in _BASE_BAD_WORDS + db_words)
+        return sorted(merged, key=len, reverse=True)
+    except Exception:
+        return _BASE_BAD_WORDS
+
+
+def _build_pattern(words: List[str]) -> re.Pattern:
+    return re.compile(
+        r'\b(' + '|'.join(re.escape(w) for w in words) + r')\b',
+        re.IGNORECASE
+    )
+
+
+# Pre-compiled static pattern (used as fast fallback)
+_STATIC_PATTERN = _build_pattern(_BASE_BAD_WORDS)
+
+
+def _get_pattern() -> re.Pattern:
+    """Build pattern including DB custom words. Uses static pattern on failure."""
+    try:
+        words = _get_all_words()
+        return _build_pattern(words)
+    except Exception:
+        return _STATIC_PATTERN
 
 
 class ProfanityViolation(Exception):
@@ -135,12 +162,14 @@ def contains_profanity(text: str) -> Tuple[bool, List[str]]:
     """
     Returns (True, [matched_words]) if the text contains profanity.
     Returns (False, []) if clean.
+    Checks against both static word list AND admin-managed custom BlockedWords.
     """
     if not text or not text.strip():
         return False, []
 
     normalized = _normalize(text)
-    matches = _WORD_PATTERN.findall(normalized)
+    pattern = _get_pattern()
+    matches = pattern.findall(normalized)
     unique_matches = list(set(m.lower() for m in matches))
     return bool(unique_matches), unique_matches
 
@@ -150,15 +179,8 @@ def clean_text(text: str) -> str:
     Returns the text with profane words replaced by asterisks.
     e.g. "fuck this" -> "f**k this"
     """
-    def _censor(match):
-        word = match.group(0)
-        if len(word) <= 2:
-            return word[0] + '*'
-        return word[0] + '*' * (len(word) - 2) + word[-1]
-
-    normalized = _normalize(text)
-    # Apply to original text using regex on original (case-preserved)
-    return _WORD_PATTERN.sub(lambda m: m.group(0)[0] + '*' * (len(m.group(0)) - 2) + m.group(0)[-1], text)
+    pattern = _get_pattern()
+    return pattern.sub(lambda m: m.group(0)[0] + '*' * (len(m.group(0)) - 2) + m.group(0)[-1], text)
 
 
 def validate_clean_text(text: str, field_name: str = "content"):
