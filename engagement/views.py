@@ -10,8 +10,9 @@ from .forms import CommentForm, NewsletterForm
 @require_POST
 def post_comment(request, article_slug):
     """
-    HTMX view handling live comment submission with basic spam heuristics.
-    Auto-approves comments from logged-in users; guest comments undergo basic spam checks.
+    HTMX view handling live comment submission with basic spam heuristics
+    and foul language detection via the BytePress Profanity Filter.
+    Auto-approves comments from logged-in users; guest comments undergo spam checks.
     """
     article = get_object_or_404(Article, slug=article_slug)
     form = CommentForm(request.POST)
@@ -48,7 +49,20 @@ def post_comment(request, article_slug):
 
         return redirect(f"/article/{article.slug}/#comment-{comment.id}")
 
-    return HttpResponse("Invalid comment data", status=400)
+    # Form is invalid — build user-friendly error message
+    error_messages = []
+    for field, errors in form.errors.items():
+        for error in errors:
+            error_messages.append(error)
+
+    error_html = " ".join(error_messages) or "Invalid comment. Please review your input."
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'engagement/partials/comment_error.html', {
+            'error': error_html
+        }, status=400)
+
+    return HttpResponse(error_html, status=400)
 
 
 @require_POST

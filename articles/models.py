@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from core.profanity import contains_profanity
 
 class Tag(models.Model):
     name = models.CharField(_('tag name'), max_length=50, unique=True)
@@ -151,8 +152,28 @@ class Article(models.Model):
         return self.content
 
     def clean(self):
-        """Hard validation enforcing alt-text on main_image when article is published."""
+        """Validate alt-text on publish AND check for foul language in all text fields."""
         super().clean()
+
+        # --- Profanity check on all text fields ---
+        text_fields = {
+            'title': self.title or '',
+            'summary': self.summary or '',
+            'content': self.content or '',
+            'title_hi': self.title_hi or '',
+            'summary_hi': self.summary_hi or '',
+        }
+        errors = {}
+        for field_name, value in text_fields.items():
+            found, words = contains_profanity(value)
+            if found:
+                errors[field_name] = ValidationError(
+                    _(f"This field contains inappropriate language. Please revise before saving.")
+                )
+        if errors:
+            raise ValidationError(errors)
+
+        # --- Alt-text enforcement on publish ---
         if self.status == ArticleStatus.PUBLISHED:
             if self.main_image and not self.main_image.alt_text.strip():
                 raise ValidationError({

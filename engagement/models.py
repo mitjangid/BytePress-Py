@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from core.profanity import contains_profanity
 
 class CommentStatus(models.TextChoices):
     PENDING = 'PENDING', _('Pending Moderation')
@@ -32,6 +34,20 @@ class Comment(models.Model):
     def __str__(self):
         author = self.user.display_name if self.user else (self.author_name or 'Anonymous')
         return f"Comment by {author} on '{self.article.title[:30]}'"
+
+    def clean(self):
+        """Block foul language in comment content and author name."""
+        super().clean()
+        errors = {}
+        for field_name in ('content', 'author_name'):
+            value = getattr(self, field_name, '') or ''
+            found, _ = contains_profanity(value)
+            if found:
+                errors[field_name] = ValidationError(
+                    "This field contains inappropriate language. Please keep it respectful."
+                )
+        if errors:
+            raise ValidationError(errors)
 
     @property
     def display_author(self):

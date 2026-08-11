@@ -1,0 +1,19 @@
+<!-- Profanity / Validation Error Toast (HTMX response for comment rejection) -->
+<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 8000)"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 -translate-y-2"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-end="opacity-0"
+     class="flex items-start justify-between gap-3 bg-crimson-50 dark:bg-crimson-900/30 border border-crimson-300 dark:border-crimson-700 text-crimson-800 dark:text-crimson-100 p-4 rounded-xl text-xs font-medium shadow">
+    <div class="flex items-start gap-2.5">
+        <i class="fas fa-shield-halved text-crimson-600 dark:text-crimson-400 text-base mt-0.5 flex-shrink-0"></i>
+        <div>
+            <span class="font-black text-sm block mb-0.5">Comment Blocked</span>
+            <span class="text-crimson-700 dark:text-crimson-200">{{ error }}</span>
+        </div>
+    </div>
+    <button @click="show = false" class="text-crimson-400 hover:text-crimson-700 dark:hover:text-white transition flex-shrink-0 mt-0.5">
+        <i class="fas fa-times"></i>
+    </button>
+</div>

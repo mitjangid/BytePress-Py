@@ -205,26 +205,52 @@
     <!-- HTMX Comments Section -->
     <section id="comments-section" class="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
         <h3 class="text-xl font-bold font-serif text-gray-900 dark:text-white mb-6 flex items-center">
-            <i class="far fa-comments mr-2 text-crimson-700 dark:text-saffron-400"></i> पाठकों की राय (Discussion) ({{ comments.count }})
+            <i class="far fa-comments mr-2 text-crimson-700 dark:text-saffron-400"></i> Reader Discussion ({{ comments.count }})
         </h3>
 
-        <!-- Comment Form -->
-        <form hx-post="/comment/post/{{ article.slug }}/" 
-              hx-target="#comments-list" 
-              hx-swap="afterbegin show:top" 
-              @htmx:after-request="if (event.detail.successful) { $el.reset(); document.getElementById('comments-list').scrollIntoView({ behavior: 'smooth', block: 'start' }); }" 
+        <!-- Comment Form (HTMX + profanity-aware error routing) -->
+        <div id="comment-error-zone" class="mb-4 empty:hidden"></div>
+
+        <form id="comment-form"
+              hx-post="/comment/post/{{ article.slug }}/"
+              hx-target="#comments-list"
+              hx-swap="afterbegin show:top"
+              hx-on::after-request="
+                  if (event.detail.successful) {
+                      this.reset();
+                      document.getElementById('comment-error-zone').innerHTML = '';
+                      document.getElementById('comments-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+              "
+              hx-on::response-error="
+                  htmx.ajax('POST', '/comment/post/{{ article.slug }}/', {
+                      source: this,
+                      target: '#comment-error-zone',
+                      swap: 'innerHTML'
+                  });
+              "
               class="mb-8 space-y-4">
             {% csrf_token %}
             {% if not user.is_authenticated %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" name="author_name" placeholder="आपका नाम (Your Name)" class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none dark:text-white">
-                <input type="email" name="author_email" placeholder="आपकी ईमेल आईडी (Email)" class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none dark:text-white">
+                <input type="text" name="author_name" placeholder="Your Name (optional)"
+                       class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-crimson-600 focus:outline-none dark:text-white">
+                <input type="email" name="author_email" placeholder="Your Email (kept private)"
+                       class="w-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-crimson-600 focus:outline-none dark:text-white">
             </div>
             {% endif %}
-            <textarea name="content" required rows="3" placeholder="अपनी टिप्पणी यहां लिखें..." class="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-crimson-600 focus:outline-none dark:text-white"></textarea>
-            <button type="submit" class="bg-crimson-700 hover:bg-crimson-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition">
-                टिप्पणी भेजें (Submit)
-            </button>
+            <textarea name="content" required rows="3"
+                      placeholder="Share your thoughts respectfully..."
+                      class="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-crimson-600 focus:outline-none dark:text-white"></textarea>
+            <div class="flex items-center justify-between gap-4">
+                <p class="text-[11px] text-gray-400 flex items-center gap-1.5">
+                    <i class="fas fa-shield-halved text-saffron-500"></i>
+                    BytePress filters inappropriate language automatically.
+                </p>
+                <button type="submit" class="bg-crimson-700 hover:bg-crimson-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition flex items-center gap-2">
+                    <i class="fas fa-paper-plane text-xs"></i> Submit Comment
+                </button>
+            </div>
         </form>
 
         <!-- Comments List -->
@@ -232,9 +258,10 @@
             {% for comment in comments %}
             {% include "engagement/partials/comment_item.html" with comment=comment %}
             {% empty %}
-            <p class="text-xs text-gray-400 italic">अभी कोई टिप्पणी नहीं है। पहली राय दें!</p>
+            <p class="text-xs text-gray-400 italic">No comments yet. Be the first to share your thoughts!</p>
             {% endfor %}
         </div>
     </section>
+
 </article>
 {% endblock %}
