@@ -62,7 +62,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -70,6 +70,12 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.site_settings_processor',
+            ],
+            'loaders': [
+                # Project-level templates take priority (our custom overrides go here)
+                'django.template.loaders.filesystem.Loader',
+                # Then app-level templates (jazzmin, django contrib, etc.)
+                'django.template.loaders.app_directories.Loader',
             ],
         },
     },
